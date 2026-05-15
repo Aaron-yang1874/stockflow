@@ -1,0 +1,101 @@
+services:
+  - type: web
+    name: stockflow-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: DB_HOST
+        fromService:
+          name: stockflow-db
+          type: pscale
+          property: host
+      - key: DB_PORT
+        value: 3306
+      - key: DB_USERNAME
+        fromService:
+          name: stockflow-db
+          type: pscale
+          property: username
+      - key: DB_PASSWORD
+        fromService:
+          name: stockflow-db
+          type: pscale
+          property: password
+      - key: DB_NAME
+        value: inventory
+      - key: REDIS_HOST
+        fromService:
+          name: stockflow-redis
+          type: redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          name: stockflow-redis
+          type: redis
+          property: port
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        sync: false
+
+  - type: web
+    name: stockflow-admin-backend
+    runtime: docker
+    dockerfilePath: ./admin-backend/Dockerfile
+    dockerContext: ./admin-backend
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: DB_HOST
+        fromService:
+          name: stockflow-db
+          type: pscale
+          property: host
+      - key: DB_PORT
+        value: 3306
+      - key: DB_USER
+        fromService:
+          name: stockflow-db
+          type: pscale
+          property: username
+      - key: DB_PASSWORD
+        fromService:
+          name: stockflow-db
+          type: pscale
+          property: password
+      - key: DB_NAME
+        value: admin_db
+      - key: REDIS_HOST
+        fromService:
+          name: stockflow-redis
+          type: redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          name: stockflow-redis
+          type: redis
+          property: port
+      - key: JWT_SECRET
+        generateValue: true
+
+  - type: pscale
+    name: stockflow-db
+    ipAddress: private
+    region: singapore
+    plan: free
+    maxConnections: 5
+    databaseName: inventory
+
+  - type: redis
+    name: stockflow-redis
+    ipAddress: private
+    region: singapore
+    plan: free
+    maxMemoryPolicy: noeviction
