@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Render 部署向导 - StockFlow</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .header h1 {
+            font-size: 2.8em;
+            background: linear-gradient(135deg, #00d9ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        .header p {
+            font-size: 1.15em;
+            opacity: 0.85;
+        }
+        
+        .section {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+        }
+        .section h2 {
+            color: #00d9ff;
+            font-size: 1.6em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .step-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+        .step-card {
+            background: rgba(255,255,255,0.08);
+            border-radius: 15px;
+            padding: 22px;
+            border-left: 4px solid #00d9ff;
+            transition: all 0.3s ease;
+        }
+        .step-card:hover {
+            transform: translateX(5px);
+            background: rgba(255,255,255,0.12);
+        }
+        .step-number {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            line-height: 32px;
+            text-align: center;
+            background: linear-gradient(135deg, #00d9ff, #00ff88);
+            color: #000;
+            border-radius: 50%;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .step-title {
+            font-size: 1.15em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+        .step-desc {
+            font-size: 0.92em;
+            line-height: 1.7;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .deploy-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 16px 24px;
+            margin-top: 18px;
+            background: linear-gradient(135deg, #00d9ff 0%, #00ff88 100%);
+            color: #000;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 1.08em;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 217, 255, 0.35);
+        }
+        .deploy-btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 30px rgba(0, 217, 255, 0.55);
+        }
+
+        .env-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 18px;
+            font-size: 0.92em;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .env-table th {
+            background: rgba(0,217,255,0.2);
+            padding: 13px;
+            text-align: left;
+            color: #00d9ff;
+            font-weight: bold;
+        }
+        .env-table td {
+            padding: 11px 13px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+        }
+        .env-table tr:hover td {
+            background: rgba(255,255,255,0.04);
+        }
+
+        .code-block {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 14px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.88em;
+            overflow-x: auto;
+            color: #00ff88;
+            line-height: 1.6;
+        }
+        .code-comment { color: #888; }
+        .code-key { color: #ffcc00; }
+        .code-value { color: #00d9ff; }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            vertical-align: middle;
+        }
+        .status-required {
+            background: rgba(255,107,107,0.2);
+            color: #ff6b6b;
+            border: 1px solid rgba(255,107,107,0.3);
+        }
+        .status-auto {
+            background: rgba(78,205,196,0.2);
+            color: #4ecdc4;
+            border: 1px solid rgba(78,205,196,0.3);
+        }
+        .status-optional {
+            background: rgba(255,230,109,0.2);
+            color: #ffe66d;
+            border: 1px solid rgba(255,230,109,0.3);
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, rgba(255,107,107,0.15), rgba(255,165,0,0.15));
+            border: 1px solid rgba(255,107,107,0.3);
+            border-radius: 12px;
+            padding: 18px 22px;
+            margin: 20px 0;
+        }
+        .warning-box h4 {
+            color: #ff6b6b;
+            margin-bottom: 8px;
+        }
+
+        .success-box {
+            background: linear-gradient(135deg, rgba(78,205,196,0.15), rgba(0,255,136,0.15));
+            border: 1px solid rgba(78,205,196,0.3);
+            border-radius: 12px;
+            padding: 18px 22px;
+            margin: 20px 0;
+        }
+        .success-box h4 {
+            color: #4ecdc4;
+            margin-bottom: 8px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 24px;
+            opacity: 0.65;
+            font-size: 0.92em;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2em; }
+            .step-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <!-- Header -->
+        <div class="header">
+            <h1>🖥️ Render 部署完整向导</h1>
+            <p>StockFlow 后端服务 + 数据库 · 一键部署指南</p>
+            <div style="margin-top:16px;">
+                <span style="background:#28a745;color:white;padding:5px 16px;border-radius:20px;font-size:0.9em;">✓ GitHub 已就绪</span>
+                <span style="background:#17a2b8;color:white;padding:5px 16px;border-radius:20px;font-size:0.9em;margin-left:8px;">🔗 Aaron-yang1874/stockflow</span>
+            </div>
+        </div>
+
+        <!-- Overview -->
+        <div class="section">
+            <h2>📋 部署概览</h2>
+            <p style="color:rgba(255,255,255,0.85);line-height:1.8;margin-top:12px;">
+                您需要在 Render 上创建 <strong style="color:#00d9ff;">3 个服务</strong>：
+                <strong style="color:#ff6b6b;">PostgreSQL 数据库</strong>、
+                <strong style="color:#ffe66d;">NestJS 业务后端</strong>、
+                <strong style="color:#4ecdc4;">NestJS 管理后台后端</strong>
+            </p>
+
+            <div class="success-box">
+                <h4>💰 免费额度说明</h4>
+                <p style="line-height:1.8;">
+                    • PostgreSQL: <strong>免费 1GB 存储</strong><br>
+                    • Web Service: <strong>免费 750 小时/月</strong>（足够小型项目）<br>
+                    • 无需信用卡即可开始使用
+                </p>
+            </div>
+        </div>
+
+        <!-- Step 1: Database -->
+        <div class="section" id="step1">
+            <h2>🗄️ 步骤 1/3：创建 PostgreSQL 数据库</h2>
+            
+            <a href="https://dashboard.render.com/new?type=psql"
+               target="_blank"
+               class="deploy-btn"
+               onclick="document.getElementById('step1').querySelector('.status-badge').textContent='✅ 已启动';this.textContent='✅ 正在创建数据库...';this.style.background='#28a745'">
+                🚀 一键前往 Render 创建数据库 →
+            </a>
+            <span class="status-badge status-required">必需</span>
+
+            <div class="step-grid" style="margin-top:24px;">
+                <div class="step-card">
+                    <div class="step-title"><span class="step-number">1</span>选择类型</div>
+                    <div class="step-desc">在 Render Dashboard 点击 <strong>"New +" → "PostgreSQL"</strong></div>
+                </div>
+                <div class="step-card">
+                    <div class="step-title"><span class="step-number">2</span>配置名称</div>
+                    <div class="step-desc">Name 填写：<code style="background:rgba(0,0,0,0.4);padding:3px 8px;border-radius:5px;color:#00ff88;">stockflow-db</code></div>
+                </div>
+                <div class="step-card">
+                    <div class="step-title"><span class="step-number">3</span>选择计划</div>
+                    <div class="step-desc">Plan 选择：<strong style="color:#4ecdc4;">Free</strong>（1GB存储，免费！）</div>
+                </div>
+                <div class="step-card">
+                    <div class="step-title"><span class="step-number">4</span>选择区域</div>
+                    <div class="step-desc">Region 选择：<strong>Singapore</strong> 或离您最近的区域</div>
+                </div>
+                <div class="step-card">
+                    <div class="step-title"><span class="step-number">5</span>数据库名称</div>
+                    <div class="step-desc">Database Name：<code style="background:rgba(0,0,0,0.4);padding:3px 8px;border-radius:5px;color:#00ff88;">inventory</code></div>
+                </div>
+                <div class="step-card">
+                    <div class="step-title"><span class="step-number">6</span>创建并记录</div>
+                    <div class="step-desc">点击 "Create Database"，<strong style="color:#ffcc00;">复制保存连接信息！</strong></div>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <h4>⚠️ 重要：请记录以下信息</h4>
+                <p style="line-height:1.8;">
+                    创建完成后，在数据库详情页找到 <strong>Connection</strong> 部分，<br>
+                    记录下 <strong style="color:#ffcc00;">Host</strong>、<strong style="color:#ffcc00;">Username</strong>、<strong style="color:#ffcc00;">Password</strong>，<br>
+                    后续配置后端时需要用到！
+                </p>
+            </div>
+        </div>
+
+        <!-- Step 2: Business Backend -->
+        <div class="section" id="step2">
+            <h2>⚙️ 步骤 2/3：部署业务后端 API</h2>
+            
+            <a href="https://dashboard.render.com/new?type=web&url=https%3A%2F%2Fgithub.com%2FAaron-yang1874%2Fstockflow"
+               target="_blank"
+               class="deploy-btn"
+               onclick="document.getElementById('step2').querySelector('.status-badge').textContent='✅ 已启动';this.textContent='✅ 正在部署业务后端...';this.style.background='#28a745'">
+                🚀 一键前往 Render 部署业务后端 →
+            </a>
+            <span class="status-badge status-required">必需</span>
+
+            <h3 style="margin-top:28px;color:#ffe66d;font-size:1.15em;">📝 配置详情：</h3>
+
+            <table class="env-table">
+                <tr>
+                    <th style="width:200px;">配置项</th>
+                    <th>值</th>
+                    <th style="width:90px;">说明</th>
+                </tr>
+                <tr>
+                    <td><strong>Name</strong></td>
+                    <td><code style="color:#00ff88;">stockflow-backend</code></td>
+                    <td><span class="status-badge status-auto">自动</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Runtime</strong></td>
+                    <td>Docker</td>
+                    <td><span class="status-badge status-auto">必选</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Dockerfile Path</strong></td>
+                    <td><code style="color:#00d9ff;">./backend/Dockerfile</code></td>
+                    <td><span class="status-badge status-optional">修改!</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Docker Context</strong></td>
+                    <td><code style="color:#00d9ff;">./backend</code></td>
+                    <td><span class="status-badge status-optional">修改!</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Branch</strong></td>
+                    <td>main</td>
+                    <td><span class="status-badge status-auto">默认</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Plan</strong></td>
+                    <td><strong style="color:#4ecdc4;">Free</strong></td>
+                    <td><span class="status-badge status-auto">免费</span></td>
+                </tr>
+            </table>
+
+            <h3 style="margin-top:28px;color:#ff6b6b;font-size:1.15em;">🔐 环境变量（Environment Variables）：</h3>
+            <p style="font-size:0.92em;color:rgba(255,255,255,0.7);margin-top:8px;">
+                在 "Advanced" 区域添加以下环境变量，<strong style="color:#ffcc00;">将 &lt;值&gt; 替换为步骤1中记录的实际信息</strong>
+            </p>
+
+            <table class="env-table">
+                <tr>
+                    <th style="width:180px;">Key</th>
+                    <th>Value</th>
+                    <th style="width:80px;">状态</th>
+                </tr>
+                <tr>
+                    <td><code>NODE_ENV</code></td>
+                    <td><code style="color:#4ecdc4;">production</code></td>
+                    <td><span class="status-badge status-auto">固定</span></td>
+                </tr>
+                <tr>
+                    <td><code>PORT</code></td>
+                    <td><code style="color:#4ecdc4;">3000</code></td>
+                    <td><span class="status-badge status-auto">固定</span></td>
+                </tr>
+                <tr>
+                    <td><code>DB_HOST</code></td>
+                    <td><code style="color:#ffcc00;">&lt;数据库 Host&gt;</code></td>
+                    <td><span class="status-badge status-required">必填</span></td>
+                </tr>
+                <tr>
+                    <td><code>DB_PORT</code></td>
+                    <td><code style="color:#4ecdc4;">5432</code></td>
+                    <td><span class="status-badge status-auto">固定</span></td>
+                </tr>
+                <tr>
+                    <td><code>DB_USERNAME</code></td>
+                    <td><code style="color:#ffcc00;">&lt;数据库 Username&gt;</code></td>
+                    <td><span class="status-badge status-required">必填</span></td>
+                </tr>
+                <tr>
+                    <td><code>DB_PASSWORD</code></td>
+                    <td><code style="color:#ffcc00;">&lt;数据库 Password&gt;</code></td>
+                    <td><span class="status-badge status-required">必填</span></td>
+                </tr>
+                <tr>
+                    <td><code>DB_NAME</code></td>
+                    <td><code style="color:#4ecdc4;">inventory</code></td>
+                    <td><span class="status-badge status-auto">固定</span></td>
+                </tr>
+                <tr>
+                    <td><code>REDIS_HOST</code></td>
+                    <td><code style="color:#888;">redis://localhost:6379</code></td>
+                    <td><span class="status-badge status-optional">可选</span></td>
+                </tr>
+                <tr>
+                    <td><code>JWT_SECRET</code></td>
+                    <td><code style="color:#ffcc00;">&lt;生成一个长随机字符串&gt;</code></td>
+                    <td><span class="status-badge status-required">必填</span></td>
+                </tr>
+                <tr>
+                    <td><code>CORS_ORIGIN</code></td>
+                    <td><code style="color:#00d9ff;">https://stockflow-frontend.vercel.app</code></td>
+                    <td><span class="status-badge status-optional">前端URL</span></td>
+                </tr>
+            </table>
+
+            <div class="code-block">
+<span class="code-comment">// JWT_SECRET 快速生成方法（在浏览器控制台运行）：</span>
+<span class="code-key">crypto.</span><span class="code-value">randomUUID</span>() + crypto.<span class="code-value">randomUUID</span>()
+<br><br>
+<span class="code-comment">// 或者访问这个链接在线生成：</span>
+<span class="code-value">https://generate-secret.vercel.app/32</span>
+            </div>
+        </div>
+
+        <!-- Step 3: Admin Backend -->
+        <div class="section" id="step3">
+            <h2>🔐 步骤 3/3：部署管理后台后端 API</h2>
+            
+            <a href="https://dashboard.render.com/new?type=web&url=https%3A%2F%2Fgithub.com%2FAaron-yang1874%2Fstockflow"
+               target="_blank"
+               class="deploy-btn"
+               onclick="document.getElementById('step3').querySelector('.status-badge').textContent='✅ 已启动';this.textContent='✅ 正在部署管理后台...';this.style.background='#28a745'">
+                🚀 一键前往 Render 部署管理后台 →
+            </a>
+            <span class="status-badge status-required">必需</span>
+
+            <h3 style="margin-top:28px;color:#4ecdc4;font-size:1.15em;">📝 与业务后端的区别（只有这些不同！）：</h3>
+
+            <table class="env-table">
+                <tr>
+                    <th style="width:200px;">配置项</th>
+                    <th>业务后端值</th>
+                    <th><strong style="color:#4ecdc4;">管理后台值（改这里！）</strong></th>
+                </tr>
+                <tr>
+                    <td><strong>Name</strong></td>
+                    <td>stockflow-backend</td>
+                    <td><code style="color:#4ecdc4;background:rgba(78,205,196,0.2);padding:3px 8px;border-radius:5px;">stockflow-admin-backend</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Dockerfile Path</strong></td>
+                    <td>./backend/Dockerfile</td>
+                    <td><code style="color:#4ecdc4;background:rgba(78,205,196,0.2);padding:3px 8px;border-radius:5px;">./admin-backend/Dockerfile</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Docker Context</strong></td>
+                    <td>./backend</td>
+                    <td><code style="color:#4ecdc4;background:rgba(78,205,196,0.2);padding:3px 8px;border-radius:5px;">./admin-backend</code></td>
+                </tr>
+                <tr>
+                    <td><strong>PORT</strong></td>
+                    <td>3000</td>
+                    <td><code style="color:#4ecdc4;background:rgba(78,205,196,0.2);padding:3px 8px;border-radius:5px;">3001</code></td>
+                </tr>
+                <tr>
+                    <td><strong>DB_NAME</strong></td>
+                    <td>inventory</td>
+                    <td><code style="color:#4ecdc4;background:rgba(78,205,196,0.2);padding:3px 8px;border-radius:5px;">admin_db</code></td>
+                </tr>
+                <tr>
+                    <td><strong>CORS_ORIGIN</strong></td>
+                    <td>frontend URL</td>
+                    <td><code style="color:#4ecdc4;background:rgba(78,205,196,0.2);padding:3px 8px;border-radius:5px;">https://stockflow-admin-frontend.vercel.app</code></td>
+                </tr>
+                <tr>
+                    <td><strong>JWT_SECRET</strong></td>
+                    <td>xxx...</td>
+                    <td><code style="color:#ffcc00;background:rgba(255,204,0,0.15);padding:3px 8px;border-radius:5px;">⚠ 使用不同的密钥！</code></td>
+                </tr>
+            </table>
+
+            <div class="warning-box">
+                <h4>⚠️ 重要提醒</h4>
+                <p style="line-height:1.8;">
+                    管理后台的 <strong>JWT_SECRET</strong> 必须与业务后端<strong>使用不同的值</strong>！<br>
+                    其他环境变量（DB_HOST、DB_PASSWORD 等）与业务后端<strong>相同</strong>。
+                </p>
+            </div>
+        </div>
+
+        <!-- Final Summary -->
+        <div class="section">
+            <h2>🎉 部署完成后的最终架构</h2>
+            
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin-top:20px;">
+                <div style="background:linear-gradient(135deg,rgba(0,217,255,0.15),rgba(0,255,136,0.1));border-radius:12px;padding:20px;text-align:center;border:1px solid rgba(0,217,255,0.25);">
+                    <div style="font-size:2em;margin-bottom:8px;">🌐</div>
+                    <div style="font-weight:bold;color:#00d9ff;">业务系统前端</div>
+                    <div style="font-size:0.9em;color:rgba(255,255,255,0.7);margin-top:5px;">Vercel 托管</div>
+                    <div style="font-family:monospace;font-size:0.82em;color:#00ff88;margin-top:8px;word-break:break-all;">stockflow-xxx.vercel.app</div>
+                </div>
+                
+                <div style="background:linear-gradient(135deg,rgba(78,205,196,0.15),rgba(0,255,136,0.1));border-radius:12px;padding:20px;text-align:center;border:1px solid rgba(78,205,196,0.25);">
+                    <div style="font-size:2em;margin-bottom:8px;">🔐</div>
+                    <div style="font-weight:bold;color:#4ecdc4;">管理后台前端</div>
+                    <div style="font-size:0.9em;color:rgba(255,255,255,0.7);margin-top:5px;">Vercel 托管</div>
+                    <div style="font-family:monospace;font-size:0.82em;color:#00ff88;margin-top:8px;word-break:break-all;">stockflow-admin-xxx.vercel.app</div>
+                </div>
+                
+                <div style="background:linear-gradient(135deg,rgba(255,204,0,0.15),rgba(255,165,0,0.1));border-radius:12px;padding:20px;text-align:center;border:1px solid rgba(255,204,0,0.25);">
+                    <div style="font-size:2em;margin-bottom:8px;">⚙️</div>
+                    <div style="font-weight:bold;color:#ffe66d;">业务API后端</div>
+                    <div style="font-size:0.9em;color:rgba(255,255,255,0.7);margin-top:5px;">Render 托管</div>
+                    <div style="font-family:monospace;font-size:0.82em;color:#00ff88;margin-top:8px;word-break:break-all;">stockflow-backend.onrender.com</div>
+                </div>
+                
+                <div style="background:linear-gradient(135deg,rgba(255,107,107,0.15),rgba(255,71,87,0.1));border-radius:12px;padding:20px;text-align:center;border:1px solid rgba(255,107,107,0.25);">
+                    <div style="font-size:2em;margin-bottom:8px;">🛡️</div>
+                    <div style="font-weight:bold;color:#ff6b6b;">管理API后端</div>
+                    <div style="font-size:0.9em;color:rgba(255,255,255,0.7);margin-top:5px;">Render 托管</div>
+                    <div style="font-family:monospace;font-size:0.82em;color:#00ff88;margin-top:8px;word-break:break-all;">stockflow-admin-backend.onrender.com</div>
+                </div>
+                
+                <div style="background:linear-gradient(135deg,rgba(156,39,176,0.15),rgba(103,58,183,0.1));border-radius:12px;padding:20px;text-align:center;border:1px solid rgba(156,39,176,0.25);">
+                    <div style="font-size:2em;margin-bottom:8px;">🗄️</div>
+                    <div style="font-weight:bold;color:#ce93d8;">PostgreSQL 数据库</div>
+                    <div style="font-size:0.9em;color:rgba(255,255,255,0.7);margin-top:5px;">Render 免费 1GB</div>
+                    <div style="font-family:monospace;font-size:0.82em;color:#00ff88;margin-top:8px;">stockflow-db.render.com</div>
+                </div>
+            </div>
+
+            <div class="success-box" style="margin-top:28px;">
+                <h4>✅ 部署检查清单</h4>
+                <p style="line-height:2;">
+                    ☐ 数据库已创建并可连接<br>
+                    ☐ 业务后端显示 <strong style="color:#4ecdc4;">"Live"</strong> 状态<br>
+                    ☐ 管理后台后端显示 <strong style="color:#4ecdc4;">"Live"</strong> 状态<br>
+                    ☐ 前端可以正常访问（无 CORS 错误）<br>
+                    ☐ 可以使用测试账号登录
+                </p>
+            </div>
+        </div>
+
+        <!-- Quick Reference -->
+        <div class="section">
+            <h2>📖 快速参考：Render 操作流程图</h2>
+            
+            <div style="background:rgba(0,0,0,0.4);border-radius:12px;padding:22px;margin-top:16px;">
+<pre style="color:#ccc;font-size:0.9em;line-height:2;font-family:'Courier New',monospace;margin:0;">
+<span style="color:#00d9ff;">┌─────────────────────────────────────────────────────────────┐</span>
+<span style="color:#00d9ff;">│                     Render 部署完整流程                       │</span>
+<span style="color:#00d9ff;">├─────────────────────────────────────────────────────────────┤</span>
+│                                                             │
+│   <span style="color:#4ecdc4;">Step 1: 创建数据库</span>                                     │
+│   ────────────────────                                      │
+│   Dashboard → New+ → PostgreSQL                             │
+│         ↓                                                   │
+│   Name: stockflow-db | Plan: Free                           │
+│         ↓                                                   │
+│   ⏳ 等待约 1 分钟                                         │
+│         ↓                                                   │
+│   ✅ 记录: Host / User / Password                            │
+│                                                             │
+│   <span style="color:#ffe66d;">Step 2: 部署业务后端</span>                                   │
+│   ────────────────────                                      │
+│   Dashboard → New+ → Web Service                            │
+│         ↓                                                   │
+│   Connect GitHub: Aaron-yang1874/stockflow                  │
+│         ↓                                                   │
+│   Configure:                                              │
+│     Runtime: Docker                                        │
+│     Dockerfile: ./backend/Dockerfile                      │
+│     Environment Variables: (填写上面的DB信息)                 │
+│         ↓                                                   │
+│   Click: Deploy                                            │
+│         ↓                                                   │
+│   ⏳ 构建约 3-5 分钟                                       │
+│         ↓                                                   │
+│   ✅ 获得 URL: https://stockflow-backend.onrender.com       │
+│                                                             │
+│   <span style="color:#ff6b6b;">Step 3: 部署管理后台</span>                                   │
+│   ────────────────────                                      │
+│   重复 Step 2，但修改:                                      │
+│     Name: stockflow-admin-backend                          │
+│     Dockerfile: ./admin-backend/Dockerfile                │
+│     PORT: 3001                                             │
+│     DB_NAME: admin_db                                      │
+│     JWT_SECRET: (不同的密钥)                                │
+│         ↓                                                   │
+│   ✅ 获得 URL: https://stockflow-admin-backend.onrender.com │
+│                                                             │
+<span style="color:#00d9ff;">└─────────────────────────────────────────────────────────────┘</span>
+</pre>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p>💡 提示: 点击上方按钮会自动在新标签页打开，请确保已登录 Render 账号</p>
+            <p style="margin-top:10px;">
+                📚 相关文档: 
+                <a href="DEPLOYMENT_GUIDE.md" style="color:#00d9ff;text-decoration:none;">完整部署指南</a> | 
+                <a href="https://github.com/Aaron-yang1874/stockflow" style="color:#00d9ff;text-decoration:none;">GitHub 仓库</a>
+            </p>
+            <p style="margin-top:15px;font-size:0.85em;">
+                Made with ❤️ for StockFlow | Render Deployment Guide v1.0
+            </p>
+        </footer>
+
+    </div>
+
+    <script>
+        function updateProgress() {
+            const completed = document.querySelectorAll('.status-badge').length;
+            // Simple animation on load
+        }
+        window.addEventListener('load', updateProgress);
+    </script>
+</body>
+</html>
