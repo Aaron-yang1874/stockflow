@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>免费部署向导 - 无需信用卡 | StockFlow</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+            padding: 28px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .header h1 {
+            font-size: 2.6em;
+            background: linear-gradient(135deg, #00ff88, #00d9ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .alert {
+            background: linear-gradient(135deg, rgba(78,205,196,0.15), rgba(0,255,136,0.12));
+            border: 1px solid rgba(78,205,196,0.3);
+            border-radius: 14px;
+            padding: 18px 22px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .alert-icon { font-size: 2em; }
+        .alert-text h3 { color: #4ecdc4; margin-bottom: 6px; font-size: 1.15em; }
+        .alert-text p { line-height: 1.6; color: rgba(255,255,255,0.85); font-size: 0.95em; }
+
+        .section {
+            background: rgba(255,255,255,0.05);
+            border-radius: 18px;
+            padding: 26px;
+            margin-bottom: 26px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .section h2 {
+            color: #00d9ff;
+            font-size: 1.5em;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Platform Cards */
+        .platform-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 20px;
+            margin-top: 18px;
+        }
+        .platform-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+            border-radius: 16px;
+            padding: 22px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .platform-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(0,217,255,0.4);
+            box-shadow: 0 8px 32px rgba(0,217,255,0.15);
+        }
+        .platform-card.recommended {
+            border-color: #4ecdc4;
+            background: linear-gradient(145deg, rgba(78,205,196,0.12), rgba(0,255,136,0.05));
+        }
+        .platform-card.recommended::before {
+            content: '⭐ 推荐';
+            position: absolute;
+            top: 12px;
+            right: -28px;
+            background: #4ecdc4;
+            color: #000;
+            padding: 4px 36px;
+            font-size: 0.8em;
+            font-weight: bold;
+            transform: rotate(45deg);
+        }
+        
+        .platform-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        .platform-logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6em;
+            background: rgba(255,255,255,0.1);
+        }
+        .platform-name {
+            font-size: 1.25em;
+            font-weight: bold;
+        }
+        .platform-badge {
+            font-size: 0.75em;
+            padding: 3px 10px;
+            border-radius: 12px;
+            margin-left: auto;
+        }
+        .badge-free { background: rgba(78,205,196,0.2); color: #4ecdc4; }
+        .badge-card { background: rgba(255,107,107,0.2); color: #ff6b6b; }
+
+        .platform-desc {
+            font-size: 0.92em;
+            line-height: 1.65;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 16px;
+        }
+        .platform-features {
+            list-style: none;
+            margin-bottom: 18px;
+        }
+        .platform-features li {
+            padding: 6px 0;
+            font-size: 0.9em;
+            color: rgba(255,255,255,0.75);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .platform-features li::before {
+            content: '✓';
+            color: #4ecdc4;
+            font-weight: bold;
+        }
+
+        .deploy-btn {
+            display: block;
+            width: 100%;
+            padding: 14px 20px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 11px;
+            font-weight: bold;
+            font-size: 1.02em;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #00d9ff, #00ff88);
+            color: #000;
+            box-shadow: 0 4px 20px rgba(0,217,255,0.3);
+        }
+        .btn-primary:hover {
+            transform: scale(1.03);
+            box-shadow: 0 6px 28px rgba(0,217,255,0.5);
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.18);
+        }
+
+        /* Config Table */
+        .config-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+            font-size: 0.9em;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .config-table th {
+            background: rgba(0,217,255,0.15);
+            padding: 12px 14px;
+            text-align: left;
+            color: #00d9ff;
+            font-weight: 600;
+        }
+        .config-table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-family: 'Courier New', monospace;
+        }
+        .config-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+        /* Code Block */
+        .code-block {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 14px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.87em;
+            overflow-x: auto;
+            line-height: 1.7;
+        }
+        .c-key { color: #ffcc00; }
+        .c-val { color: #00d9ff; }
+        .c-str { color: #4ecdc4; }
+        .c-comment { color: #888; }
+
+        /* Steps */
+        .steps-container {
+            counter-reset: step-counter;
+        }
+        .step-item {
+            background: rgba(255,255,255,0.04);
+            border-left: 3px solid #00d9ff;
+            border-radius: 0 12px 12px 0;
+            padding: 16px 18px;
+            margin: 12px 0;
+            position: relative;
+        }
+        .step-item::before {
+            counter-increment: step-counter;
+            content: counter(step-counter);
+            position: absolute;
+            left: -18px;
+            top: 14px;
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #00d9ff, #00ff88);
+            color: #000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+        .step-title { font-weight: bold; color: #fff; margin-bottom: 6px; font-size: 1.02em; }
+        .step-desc { color: rgba(255,255,255,0.75); line-height: 1.6; font-size: 0.92em; }
+
+        /* Comparison */
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 18px;
+            font-size: 0.9em;
+        }
+        .compare-table th {
+            background: rgba(255,255,255,0.08);
+            padding: 13px;
+            text-align: center;
+            color: #00d9ff;
+        }
+        .compare-table td {
+            padding: 11px 13px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .compare-table tr:first-child td { font-weight: bold; color: #fff; }
+        .yes { color: #4ecdc4; font-weight: bold; }
+        .no { color: #ff6b6b; opacity: 0.7; }
+        .partial { color: #ffe66d; }
+
+        footer {
+            text-align: center;
+            margin-top: 35px;
+            padding: 20px;
+            opacity: 0.55;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 1.8em; }
+            .platform-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- Header -->
+    <div class="header">
+        <h1>🚀 免费部署方案（无需信用卡）</h1>
+        <p style="font-size:1.1em;opacity:0.9;">StockFlow 后端服务 · 完全免费 · 零门槛上线</p>
+    </div>
+
+    <!-- Alert -->
+    <div class="alert">
+        <div class="alert-icon">💳</div>
+        <div class="alert-text">
+            <h3>✅ 本页面所有平台均无需绑定银行卡！</h3>
+            <p>以下推荐的数据库和托管平台全部<strong style="color:#4ecdc4;">免费使用</strong>且<strong style="color:#4ecdc4;">不需要信用卡验证</strong></p>
+        </div>
+    </div>
+
+    <!-- Part 1: Database Options -->
+    <div class="section" id="database">
+        <h2>🗄️ 第一步：选择免费数据库（二选一）</h2>
+
+        <div class="platform-grid">
+            
+            <!-- Supabase -->
+            <div class="platform-card recommended">
+                <div class="platform-header">
+                    <div class="platform-logo">⚡</div>
+                    <div>
+                        <div class="platform-name">Supabase</div>
+                        <span class="platform-badge badge-free">免费无限</span>
+                    </div>
+                </div>
+                <div class="platform-desc">
+                    Firebase 的开源替代品，提供完整的 PostgreSQL 数据库服务，<strong style="color:#4ecdc4;">永久免费额度非常慷慨</strong>
+                </div>
+                <ul class="platform-features">
+                    <li><strong>500MB</strong> 数据库存储</li>
+                    <li><strong>无限</strong> API 请求数</li>
+                    <li><strong>50,000</strong> 月活用户</li>
+                    <li><strong>实时订阅</strong> 功能</li>
+                    <li>内置用户认证系统</li>
+                    <li>可视化管理面板 (Table Editor)</li>
+                    <li>自动生成 API 文档</li>
+                </ul>
+                <a href="https://supabase.com/sign-up"
+                   target="_blank"
+                   class="deploy-btn btn-primary"
+                   onclick="this.textContent='✅ 正在跳转 Supabase...';this.style.background='#28a745'">
+                    ⚡ 注册 Supabase（推荐）→
+                </a>
+            </div>
+
+            <!-- Neon -->
+            <div class="platform-card recommended">
+                <div class="platform-header">
+                    <div class="platform-logo" style="background:linear-gradient(135deg,#10b981,#059669)">🐘</div>
+                    <div>
+                        <div class="platform-name">Neon</div>
+                        <span class="platform-badge badge-free">Serverless PG</span>
+                    </div>
+                </div>
+                <div class="platform-desc">
+                    Serverless PostgreSQL 平台，专为开发者打造，<strong style="color:#4ecdc4;">冷启动快、自动扩缩容</strong>
+                </div>
+                <ul class="platform-features">
+                    <li><strong>0.5GB</strong> 免费存储</li>
+                    <li><strong>无连接数限制</strong></li>
+                    <li>Serverless 架构</li>
+                    <li>自动暂停节省资源</li>
+                    <li>Branch 功能（开发/测试环境）</li>
+                    <li>一键 Fork 数据库</li>
+                    <li>连接池内置</li>
+                </ul>
+                <a href="https://console.neon.tech/signup"
+                   target="_blank"
+                   class="deploy-btn btn-primary"
+                   onclick="this.textContent='✅ 正在跳转 Neon...';this.style.background='#28a745'">
+                    🐘 注册 Neon →
+                </a>
+            </div>
+
+            <!-- PlanetScale -->
+            <div class="platform-card">
+                <div class="platform-header">
+                    <div class="platform-logo" style="background:linear-gradient(135deg,#000,#333)">🪐</div>
+                    <div>
+                        <div class="platform-name">PlanetScale</div>
+                        <span class="platform-badge badge-free">MySQL兼容</span>
+                    </div>
+                </div>
+                <div class="platform-desc">
+                    MySQL 兼容的 Serverless 数据库平台，由 Vitess 驱动，<strong>适合需要 MySQL 的项目</strong>
+                </div>
+                <ul class="platform-features">
+                    <li><strong>5GB</strong> 免费存储</li>
+                    <li><strong>1 Billion</strong> 行读取/月</li>
+                    <li>非阻塞 Schema 变更</li>
+                    <li>自动分片扩展</li>
+                    <li>分支数据库</li>
+                    <li>查询分析</li>
+                </ul>
+                <a href="https://app.planetscale.com/signup"
+                   target="_blank"
+                   class="deploy-btn btn-secondary">
+                    🪐 注册 PlanetScale →
+                </a>
+            </div>
+
+            <!-- Turso (SQLite) -->
+            <div class="platform-card">
+                <div class="platform-header">
+                    <div class="platform-logo" style="background:linear-gradient(135deg,#f59e0b,#d97706)">🦺</div>
+                    <div>
+                        <div class="platform-name">Turso / libSQL</div>
+                        <span class="platform-badge badge-free">边缘数据库</span>
+                    </div>
+                </div>
+                <div class="platform-desc">
+                    SQLite 的边缘分布式版本，<strong>超轻量级、超快速</strong>
+                </div>
+                <ul class="platform-features">
+                    <li><strong>9GB</strong> 免费存储</li>
+                    <li><strong>500M</strong> 行读取/月</li>
+                    <li>边缘节点全球分布</li>
+                    <li>嵌入式 SQLite 兼容</li>
+                    <li>复制功能</li>
+                    <li>超低延迟</li>
+                </ul>
+                <a href="https://turso.tech"
+                   target="_blank"
+                   class="deploy-btn btn-secondary">
+                    🦺 注册 Turso →
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Part 2: Backend Hosting -->
+    <div class="section" id="backend">
+        <h2>⚙️ 第二步：选择免费后端托管（三选一）</h2>
+
+        <div class="platform-grid">
+
+            <!-- Glitch -->
+            <div class="platform-card recommended">
+                <div class="platform-header">
+                    <div class="platform-logo" style="background:linear-gradient(135deg,#ff6b6b,#ee5a6f)">👾</div>
+                    <div>
+                        <div class="platform-name">Glitch</div>
+                        <span class="platform-badge badge-free">最简单</span>
+                    </div>
+                </div>
+                <div class="platform-desc">
+                    最简单的全栈应用托管平台，<strong style="color:#4ecdc4;">直接从 GitHub 导入即可运行</strong>，适合 NestJS 后端
+                </div>
+                <ul class="platform-features">
+                    <li><strong>1000 小时/月</strong> 免费运行时间</li>
+                    <li>从 GitHub 一键导入项目</li>
+                    <li>自动检测 package.json 启动命令</li>
+                    <li>支持 Node.js / Python / Go 等</li>
+                    <li>在线代码编辑器</li>
+                    <li>实时日志查看</li>
+                    <li>自定义域名支持</li>
+                </ul>
+                <a href="https://glitch.com/edit/#!/import/github/Aaron-yang1874/stockflow?path=backend"
+                   target="_blank"
+                   class="deploy-btn btn-primary"
+                   onclick="this.textContent='✅ 正在导入到 Glitch...';this.style.background='#28a745'">
+                    👾 一键导入业务后端到 Glitch →
+                </a>
+            </div>
+
+            <!-- Replit -->
+            <div class="platform-card recommended">
+                <div class="platform-header">
+                    <div class="platform-logo" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">⌨️</div>
+                    <div>
+                        <div class="platform-name">Replit</div>
+                        <span class="platform-badge badge-free">永久免费</span>
+                    </div>
+                </div>
+                <div class="platform-desc">
+                    基于浏览器的 IDE + 托管一体化平台，<strong style="color:#4ecdc4;">免费版可常驻运行</strong>
+                </div>
+                <ul class="platform-features">
+                    <li><strong>Always On:</strong> 常驻运行模式</li>
+                    <li><strong>0.5 vCPU / 512MB RAM</strong> 免费</li>
+                    <li>从 GitHub 导入项目</li>
+                    <li>内置终端和文件编辑器</li>
+                    <li>支持 Docker 容器</li>
+                    <li>Secrets 环境变量管理</li>
+                    <li>协作功能</li>
+                </ul>
+                <a href="https://replit.com/github/Aaron-yang1874/stockflow?branch=main"
+                   target="_blank"
+                   class="deploy-btn btn-primary"
+                   onclick="this.textContent='✅ 正在导入到 Replit...';this.style.background='#28a745'">
+                    ⌨️ 一键导入到 Replit →
+                </a>
+            </div>
+
+            <!-- Koyeb -->
+            <div class="platform-card">
+                <div class="platform-header">
+                    <div class="platform-logo" style="background:linear-gradient(135deg,#667eea,#764ba2)">☁️</div>
+                    <div>
+                        <div class="platform-name">Koyeb</div>
+                        <span class="platform-badge badge-free">企业级</span>
+                    </div>
+                </div>
+                <div class="platform-desc">
+                    多区域 serverless 平台，<strong>企业级功能但提供免费额度</strong>
+                </div>
+                <ul class="platform-features">
+                    <li><strong>$5.5/月</strong> 免费额度</li>
+                    <li>多区域全球部署</li>
+                    <li>Docker 原生支持</li>
+                    <li>自动 HTTPS 和 CDN</li>
+                    <li>内网服务发现</li>
+                    <li>水平自动扩展</li>
+                    <li>私有网络</li>
+                </ul>
+                <a href="https://app.koyeb.com/setup"
+                   target="_blank"
+                   class="deploy-btn btn-secondary">
+                    ☁️ 注册 Koyeb →
+                </a>
+            </div>
+
+            <!-- Fly.io -->
+            <div class="platform-card">
+                <div class="platform-header">
+                    <div class="platform-logo" style="background:linear-gradient(135deg,#7c3aed,#a855f7">🪂</div>
+                    <div>
+                        <div class="platform-name">Fly.io</div>
+                        <span class="platform-badge badge-partial">需信用卡</span>
+                    </div>
+                </div>
+                <div class="platform-desc">
+                    边缘计算平台，性能优秀，<strong>但注册可能需要信用卡验证（不扣费）</strong>
+                </div>
+                <ul class="platform-features">
+                    <li><strong>3 shared-cpu-vm</strong> 免费</li>
+                    <li><strong>3GB</strong> 卷存储</li>
+                    <li>全球边缘节点</li>
+                    <li>Docker 原生</li>
+                    <li>WireGuard VPN 内网</li>
+                    <li>自动 SSL 证书</li>
+                </ul>
+                <a href="https://fly.io/app/sign-up"
+                   target="_blank"
+                   class="deploy-btn btn-secondary" style="opacity:0.6;">
+                    🪂 Fly.io (可能需卡) →
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Part 3: Detailed Guide for Supabase + Glitch (Recommended Combo) -->
+    <div class="section" id="guide">
+        <h2>📖 详细教程：Supabase + Glitch 组合（推荐）</h2>
+        
+        <h3 style="margin-top:24px;color:#4ecdc4;font-size:1.15em;">🗄️ A. 创建 Supabase 数据库</h3>
+        
+        <div class="steps-container">
+            <div class="step-item">
+                <div class="step-title">注册账号</div>
+                <div class="step-desc">访问 <strong style="color:#00d9ff;">supabase.com</strong>，点击 "Start your project"，使用 GitHub 登录（无需信用卡！）</div>
+            </div>
+            <div class="step-item">
+                <div class="step-title">创建新项目</div>
+                <div class="step-desc">Organization 选默认或新建 → Name 填写 <code style="background:rgba(0,0,0,0.4);padding:2px 8px;border-radius:4px;color:#4ecdc4;">stockflow-db</code> → Database Password 设置一个强密码（记住它！）→ Region 选择 <code style="background:rgba(0,0,0,0.4);padding:2px 8px;border-radius:4px;color:#4ecdc4;">Singapore</code> 或离您最近的</div>
+            </div>
+            <div class="step-item">
+                <div class="step-title">获取连接信息</div>
+                <div class="step-desc">项目创建后，进入 <strong>Settings → Database</strong> 页面，记录以下信息：</div>
+            </div>
+        </div>
+
+        <table class="config-table">
+            <tr><th>配置项</th><th>值的位置</th><th>示例</th></tr>
+            <tr><td><code>DB_HOST</code></td><td>Connection string 中的 host 部分</td><td><code style="color:#4ecdc4;">db.xxx.supabase.co</code></td></tr>
+            <tr><td><code>DB_PORT</code></td><td>固定值</td><td><code style="color:#4ecdc4;">5432</code></td></tr>
+            <tr><td><code>DB_USERNAME</code></td><td>Connection string 中的 user</td><td><code style="color:#4ecdc4;">postgres</code></td></tr>
+            <tr><td><code>DB_PASSWORD</code></td><td>您刚才设置的密码</td><td><code style="color:#ffcc00;">your-password-here</code></td></tr>
+            <tr><td><code>DB_NAME</code></td><td>固定值</td><td><code style="color:#4ecdc4;">postgres</code></td></tr>
+            <tr><td><code>JWT_SECRET</code></td><td>自己生成的随机字符串</td><td><code style="color:#ffcc00;">crypto.randomUUID() x2</code></td></tr>
+        </table>
+
+        <h3 style="margin-top:32px;color:#ff6b6b;font-size:1.15em;">⚙️ B. 在 Glitch 部署业务后端</h3>
+
+        <div class="steps-container">
+            <div class="step-item">
+                <div class="step-title">导入 GitHub 项目</div>
+                <div class="step-desc">访问下方按钮，或手动去 glitch.com 点击 <strong>"New Project → From GitHub"</strong>，搜索 <code style="background:rgba(0,0,0,0.4);padding:2px 8px;border-radius:4px;color:#ff6b6b;">Aaron-yang1874/stockflow</code></div>
+            </div>
+            <div class="step-item">
+                <div class="step-title">设置项目目录</div>
+                <div class="step-desc">Root Directory 设为：<code style="background:rgba(0,0,0,0.4);padding:2px 8px;border-radius:4px;color:#ffcc00;">backend</code>（重要！否则会找错位置）</div>
+            </div>
+            <div class="step-item">
+                <div class="step-title">添加环境变量</div>
+                <div class="step-desc">在项目 Settings → Environment Variables 中添加上方表格中的所有变量</div>
+            </div>
+            <div class="step-item">
+                <div class="step-title">修改启动命令</div>
+                <div class="step-desc">Start Command 改为：<code style="background:rgba(0,0,0,0.4);padding:2px 8px;border-radius:4px;color:#4ecdc4;">npm run start:prod</code></div>
+            </div>
+            <div class="step-item">
+                <div class="step-title">等待构建完成</div>
+                <div class="step-desc">Glitch 会自动 npm install → nest build → 运行，约 3-5 分钟</div>
+            </div>
+        </div>
+
+        <a href="https://glitch.com/edit/#!/import/github/Aaron-yang1874/stockflow?path=backend"
+           target="_blank"
+           class="deploy-btn btn-primary"
+           style="margin-top:24px;padding:18px;font-size:1.1em;"
+           onclick="this.textContent='✅ 正在打开 Glitch 导入页面...'">
+            👾 立即开始：导入业务后端到 Glitch →
+        </a>
+
+        <h3 style="margin-top:32px;color:#ce93d8;font-size:1.15em;">🔐 C. 同样方式部署管理后台后端</h3>
+
+        <p style="line-height:1.8;margin-top:12px;color:rgba(255,255,255,0.85);">
+            重复步骤 B，但修改以下配置：
+        </p>
+
+        <table class="config-table">
+            <tr><th>配置项</th><th>业务后端值</th><th><strong style="color:#ce93d8;">管理后台值（改这里）</strong></th></tr>
+            <tr><td>Root Directory</td><td>backend</td><td><code style="color:#ce93d8;background:rgba(206,147,216,0.15);padding:2px 8px;border-radius:4px;">admin-backend</code></td></tr>
+            <tr><td>Project Name</td><td>stockflow-backend</td><td><code style="color:#ce93d8;background:rgba(206,147,216,0.15);padding:2px 8px;border-radius:4px;">stockflow-admin-backend</code></td></tr>
+            <tr><td>PORT</td><td>3000</td><td><code style="color:#ce93d8;background:rgba(206,147,216,0.15);padding:2px 8px;border-radius:4px;">3001</code></td></tr>
+            <tr><td>DB_NAME</td><td>inventory</td><td><code style="color:#ce93d8;background:rgba(206,147,216,0.15);padding:2px 8px;border-radius:4px;">admin_db</code></td></tr>
+            <tr><td>JWT_SECRET</td><td>xxx...</td><td><code style="color:#ffcc00;background:rgba(255,204,0,0.15);padding:2px 8px;border-radius:4px;">⚠ 使用不同密钥</code></td></tr>
+        </table>
+
+        <a href="https://glitch.com/edit/#!/import/github/Aaron-yang1874/stockflow?path=admin-backend"
+           target="_blank"
+           class="deploy-btn btn-primary"
+           style="margin-top:24px;padding:18px;font-size:1.1em;"
+           onclick="this.textContent='✅ 正在打开管理后台导入...'">
+            🔐 立即开始：导入管理后台到 Glitch →
+        </a>
+    </div>
+
+    <!-- Comparison Table -->
+    <div class="section">
+        <h2>📊 平台对比总览</h2>
+        
+        <table class="compare-table">
+            <tr>
+                <th>特性</th>
+                <th>Render ⛔</th>
+                <th>Supabase ⚡</th>
+                <th>Neon 🐘</th>
+                <th>Glitch 👾</th>
+                <th>Replit ⌨️</th>
+            </tr>
+            <tr>
+                <td>需要信用卡</td>
+                <td class="no">❌ 需要</td>
+                <td class="yes">✅ 不需要</td>
+                <td class="yes">✅ 不需要</td>
+                <td class="yes">✅ 不需要</td>
+                <td class="yes">✅ 不需要</td>
+            </tr>
+            <tr>
+                <td>免费数据库容量</td>
+                <td class="partial">1GB</td>
+                <td class="yes">500MB</td>
+                <td class="yes">512MB</td>
+                <td>-</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>免费运行时长</td>
+                <td class="partial">750h/月</td>
+                <td>-</td>
+                <td>-</td>
+                <td class="yes">1000h/月</td>
+                <td class="yes">Always On</td>
+            </tr>
+            <tr>
+                <td>Docker 支持</td>
+                <td class="yes">✅</td>
+                <td>-</td>
+                <td>-</td>
+                <td class="no">❌</td>
+                <td class="yes">✅</td>
+            </tr>
+            <tr>
+                <td>GitHub 导入</td>
+                <td class="yes">✅</td>
+                <td>-</td>
+                <td>-</td>
+                <td class="yes">✅ 一键</td>
+                <td class="yes">✅ 一键</td>
+            </tr>
+            <tr>
+                <td>中国访问速度</td>
+                <td class="partial">中等</td>
+                <td class="yes">较快</td>
+                <td class="yes">较快</td>
+                <td class="partial">较慢</td>
+                <td class="partial">一般</td>
+            </tr>
+            <tr>
+                <td>上手难度</td>
+                <td class="yes">简单</td>
+                <td class="yes">简单</td>
+                <td class="yes">简单</td>
+                <td class="yes">⭐ 最简单</td>
+                <td class="yes">简单</td>
+            </tr>
+        </table>
+
+        <div class="success-box" style="margin-top:24px;background:linear-gradient(135deg,rgba(78,205,196,0.12),rgba(0,255,136,0.08));border:1px solid rgba(78,205,196,0.25);">
+            <h4 style="color:#4ecdc4;">🏆 推荐组合</h4>
+            <p style="line-height:1.9;margin-top:10px;">
+                <strong style="color:#fff;">方案A（最省心）：</strong> Supabase 数据库 + Glitch 后端<br>
+                <span style="font-size:0.95em;opacity:0.85;">→ 零成本、零门槛、5分钟搞定</span><br><br>
+                <strong style="color:#fff;">方案B（更专业）：</strong> Neon 数据库 + Replit 后端<br>
+                <span style="font-size:0.95em;opacity:0.85;">→ 性能更好、Always On 常驻运行</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Final Architecture -->
+    <div class="section">
+        <h2>🎯 最终架构图（免费版）</h2>
+        
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:20px;text-align:center;">
+            <div style="background:rgba(0,217,255,0.08);border:1px solid rgba(0,217,255,0.2);border-radius:12px;padding:18px;">
+                <div style="font-size:1.8em;">🌐</div>
+                <div style="font-weight:bold;color:#00d9ff;margin:8px 0 4px;">业务前端</div>
+                <div style="font-size:0.85em;opacity:0.7;">Vercel (Free)</div>
+                <div style="font-family:monospace;font-size:0.78em;color:#4ecdc4;margin-top:6px;word-break:break-all;">xxx.vercel.app</div>
+            </div>
+            <div style="background:rgba(78,205,196,0.08);border:1px solid rgba(78,205,196,0.2);border-radius:12px;padding:18px;">
+                <div style="font-size:1.8em;">🔐</div>
+                <div style="font-weight:bold;color:#4ecdc4;margin:8px 0 4px;">管理前端</div>
+                <div style="font-size:0.85em;opacity:0.7;">Vercel (Free)</div>
+                <div style="font-family:monospace;font-size:0.78em;color:#4ecdc4;margin-top:6px;word-break:break-all;">xxx.vercel.app</div>
+            </div>
+            <div style="background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.2);border-radius:12px;padding:18px;">
+                <div style="font-size:1.8em;">⚙️</div>
+                <div style="font-weight:bold;color:#ff6b6b;margin:8px 0 4px;">业务API</div>
+                <div style="font-size:0.85em;opacity:0.7;">Glitch (Free)</div>
+                <div style="font-family:monospace;font-size:0.78em;color:#4ecdc4;margin-top:6px;word-break:break-all;">xxx.glitch.me</div>
+            </div>
+            <div style="background:rgba(206,147,216,0.08);border:1px solid rgba(206,147,216,0.2);border-radius:12px;padding:18px;">
+                <div style="font-size:1.8em;">🛡️</div>
+                <div style="font-weight:bold;color:#ce93d8;margin:8px 0 4px;">管理API</div>
+                <div style="font-size:0.85em;opacity:0.7;">Glitch (Free)</div>
+                <div style="font-family:monospace;font-size:0.78em;color:#4ecdc4;margin-top:6px;word-break:break-all;">xxx.glitch.me</div>
+            </div>
+            <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:12px;padding:18px;">
+                <div style="font-size:1.8em;">⚡</div>
+                <div style="font-weight:bold;color:#f59e0b;margin:8px 0 4px;">数据库</div>
+                <div style="font-size:0.85em;opacity:0.7;">Supabase (Free)</div>
+                <div style="font-family:monospace;font-size:0.78em;color:#4ecdc4;margin-top:6px;">xxx.supabase.co</div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>💰 全部免费 · 💳 无需信用卡 · 🚀 5分钟上线</p>
+        <p style="margin-top:10px;">
+            <a href="DEPLOY.html" style="color:#00d9ff;text-decoration:none;margin:0 12px;">返回 Vercel 部署页</a> |
+            <a href="RENDER_DEPLOY.html" style="color:#00d9ff;text-decoration:none;margin:0 12px;">Render 方案</a> |
+            <a href="https://github.com/Aaron-yang1874/stockflow" style="color:#00d9ff;text-decoration:none;margin:0 12px;">GitHub</a>
+        </p>
+    </footer>
+
+</div>
+</body>
+</html>
